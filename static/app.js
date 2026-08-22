@@ -224,7 +224,7 @@ function renderDashboard(data) {
 
             <div class="page-header">
                 <div>
-                    <h1 class="greeting">${getGreeting()}, Kashyap!</h1>
+                    <h1 class="greeting">${getGreeting()}!</h1>
                     <p class="subtitle">Here's what's happening with your hiring today.</p>
                 </div>
                 <button class="btn btn-primary" onclick="navigate('jobs/new')">
