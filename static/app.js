@@ -53,6 +53,21 @@ async function checkApiKey() {
     } catch {
         state.hasApiKey = false;
     }
+
+    if (!state.hasApiKey) {
+        const savedKey = localStorage.getItem('geminiApiKey');
+        if (savedKey) {
+            try {
+                await apiFetch('/set-api-key', {
+                    method: 'POST',
+                    body: JSON.stringify({ api_key: savedKey }),
+                });
+                state.hasApiKey = true;
+            } catch (err) {
+                localStorage.removeItem('geminiApiKey');
+            }
+        }
+    }
 }
 
 
@@ -1006,7 +1021,8 @@ function renderSettings() {
             <div class="form-group">
                 <label class="form-label" for="api-key-input">Gemini API Key</label>
                 <input type="password" id="api-key-input" class="form-input"
-                    placeholder="Enter your Google AI Studio API key">
+                    placeholder="Enter your Google AI Studio API key"
+                    value="${localStorage.getItem('geminiApiKey') || ''}">
                 <p class="api-help">
                     Get your free API key from
                     <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
@@ -1041,6 +1057,7 @@ async function handleSaveApiKey() {
             method: 'POST',
             body: JSON.stringify({ api_key: key }),
         });
+        localStorage.setItem('geminiApiKey', key);
         state.hasApiKey = true;
         document.getElementById('api-status-display').innerHTML =
             '<div class="api-status connected"><span class="status-dot connected"></span> Connected — API key is set</div>';
