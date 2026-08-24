@@ -53,21 +53,6 @@ async function checkApiKey() {
     } catch {
         state.hasApiKey = false;
     }
-
-    if (!state.hasApiKey) {
-        const savedKey = localStorage.getItem('geminiApiKey');
-        if (savedKey) {
-            try {
-                await apiFetch('/set-api-key', {
-                    method: 'POST',
-                    body: JSON.stringify({ api_key: savedKey }),
-                });
-                state.hasApiKey = true;
-            } catch (err) {
-                localStorage.removeItem('geminiApiKey');
-            }
-        }
-    }
 }
 
 
@@ -232,11 +217,7 @@ function renderDashboard(data) {
                 </button>
             </div>
 
-            ${!state.hasApiKey ? `
-            <div class="api-key-banner">
-                ${icon('info', 18)}
-                <span>Set up your Gemini API key in <a href="#/settings">Settings</a> to start screening candidates.</span>
-            </div>` : ''}
+
 
             ${latest ? featuredJobHTML(latest, 0) : emptyJobsHTML()}
 
@@ -1007,67 +988,39 @@ function renderAllCandidates(candidates) {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   SETTINGS VIEW
+   SETTINGS VIEW (About)
    ═══════════════════════════════════════════════════════════════ */
 
 function renderSettings() {
     const main = document.getElementById('main-content');
     main.innerHTML = `
     <div class="page-narrow">
-        <h1 class="page-title">Settings</h1>
-        <p class="page-subtitle">Configure your API key for resume screening.</p>
+        <h1 class="page-title">About ResumeScreen</h1>
+        <p class="page-subtitle">Intelligent resume screening powered by Google Gemini.</p>
 
-        <div class="card form-card settings-card">
-            <div class="form-group">
-                <label class="form-label" for="api-key-input">Gemini API Key</label>
-                <input type="password" id="api-key-input" class="form-input"
-                    placeholder="Enter your Google AI Studio API key"
-                    value="${localStorage.getItem('geminiApiKey') || ''}">
-                <p class="api-help">
-                    Get your free API key from
-                    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
-                    The key is stored in memory only and never written to disk.
-                </p>
+        <div class="card form-card" style="gap:16px">
+            <div class="detail-section">
+                <div class="detail-label">How it works</div>
+                <p class="detail-text">Upload resume PDFs (or paste text) for any job posting. Click <strong>Screen Candidates</strong> and the AI analyzes each resume against the job description — extracting skills, experience, and education, then producing a match score and written justification.</p>
             </div>
-
-            <button class="btn btn-primary" id="save-key-btn" onclick="handleSaveApiKey()">Save API Key</button>
-
-            <div id="api-status-display">
-                ${state.hasApiKey
-                    ? '<div class="api-status connected"><span class="status-dot connected"></span> Connected — API key is set</div>'
-                    : '<div class="api-status disconnected"><span class="status-dot disconnected"></span> Not configured</div>'}
+            <div class="detail-section">
+                <div class="detail-label">Scoring</div>
+                <div class="chips" style="margin-top:4px">
+                    <span class="chip chip-matched">75–100 &nbsp;Strong Match</span>
+                    <span style="padding:3px 10px;border-radius:9999px;font-size:12px;font-weight:500;background:#FFFBEB;color:#B45309">50–74 &nbsp;Needs Review</span>
+                    <span class="chip chip-missing">0–49 &nbsp;Low Match</span>
+                </div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-label">Stack</div>
+                <p class="detail-text">FastAPI · SQLite · Google Gemini 3.6 Flash · Vanilla JS</p>
+            </div>
+            <div class="detail-section">
+                <div class="detail-label">Source Code</div>
+                <p class="detail-text"><a href="https://github.com/Kashyap-2005/ResumeScreener" target="_blank" rel="noopener" style="color:var(--primary)">github.com/Kashyap-2005/ResumeScreener</a></p>
             </div>
         </div>
     </div>`;
-}
-
-
-async function handleSaveApiKey() {
-    const input = document.getElementById('api-key-input');
-    const btn   = document.getElementById('save-key-btn');
-    const key   = input.value.trim();
-
-    if (!key) { showToast('Please enter an API key', 'warning'); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Verifying...';
-
-    try {
-        await apiFetch('/set-api-key', {
-            method: 'POST',
-            body: JSON.stringify({ api_key: key }),
-        });
-        localStorage.setItem('geminiApiKey', key);
-        state.hasApiKey = true;
-        document.getElementById('api-status-display').innerHTML =
-            '<div class="api-status connected"><span class="status-dot connected"></span> Connected — API key is set</div>';
-        input.value = '';
-        showToast('API key verified and saved', 'success');
-    } catch (err) {
-        showToast(err.message, 'error');
-    }
-    btn.disabled = false;
-    btn.textContent = 'Save API Key';
 }
 
 
