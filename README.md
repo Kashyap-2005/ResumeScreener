@@ -1,4 +1,4 @@
-# ResumeScreen
+# ResumeScreener
 
 A resume screening tool I built to replace manual shortlisting. Instead of reading through every resume, you paste a job description and upload PDFs — the app extracts skills, experience, and education from each resume, then scores and ranks candidates against the JD using semantic matching via Google Gemini.
 
